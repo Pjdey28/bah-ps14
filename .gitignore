@@ -13,3 +13,4 @@ outputs/
 
 .venv/
 data/raw/
+data/processed/
