@@ -1,0 +1,36 @@
+from pathlib import Path
+
+PROJECT_ROOT=Path(__file__).resolve().parent.parent
+
+RAW_GOES=PROJECT_ROOT/"data"/"raw"/"GOES"
+RAW_WIND=PROJECT_ROOT/"data"/"raw"/"WIND"
+
+PROCESSED=PROJECT_ROOT/"data"/"processed"
+
+GOES_PROCESSED=PROCESSED/"GOES"
+WIND_PROCESSED=PROCESSED/"WIND"
+MASTER_PROCESSED=PROCESSED/"MASTER"
+
+MODELS=PROJECT_ROOT/"models"
+
+OUTPUTS=PROJECT_ROOT/"outputs"
+
+PLOTS=OUTPUTS/"plots"
+REPORTS=OUTPUTS/"reports"
+PREDICTIONS=OUTPUTS/"predictions"
+
+LOGS=PROJECT_ROOT/"logs"
+
+for folder in [
+GOES_PROCESSED,
+WIND_PROCESSED,
+MASTER_PROCESSED,
+MODELS,
+PLOTS,
+REPORTS,
+PREDICTIONS,
+LOGS]:
+    folder.mkdir(parents=True,exist_ok=True)
+
+TRAIN_DATA = PROCESSED / "train"
+TRAIN_DATA.mkdir(parents=True, exist_ok=True)
