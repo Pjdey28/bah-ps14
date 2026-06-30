@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-
+from src.config import FIGURES, ARTIFACTS
 
 class ModelComparison:
 
     def __init__(self):
 
         os.makedirs(
-            "artifacts/figures",
+            FIGURES,
             exist_ok=True
         )
 
@@ -81,7 +81,7 @@ class ModelComparison:
 
         df.to_csv(
 
-            "artifacts/model_metrics.csv",
+            ARTIFACTS/f"/model_metrics.csv",
 
             index=False
 
@@ -141,7 +141,7 @@ class ModelComparison:
 
         plt.savefig(
 
-            f"artifacts/figures/{metric}.png"
+            FIGURES/f"{metric}.png"
 
         )
 
@@ -191,7 +191,7 @@ class ModelComparison:
 
             plt.savefig(
 
-                f"artifacts/figures/{name}_{h}.png"
+                FIGURES/f"{name}_{h}.png"
 
             )
 
@@ -233,7 +233,7 @@ class ModelComparison:
 
             plt.savefig(
 
-                f"artifacts/figures/{name}_Residual_{h}.png"
+                FIGURES/f"{name}_Residual_{h}.png"
 
             )
 

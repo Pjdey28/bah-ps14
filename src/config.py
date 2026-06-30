@@ -1,36 +1,39 @@
 from pathlib import Path
 
-PROJECT_ROOT=Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-RAW_GOES=PROJECT_ROOT/"data"/"raw"/"GOES"
-RAW_WIND=PROJECT_ROOT/"data"/"raw"/"WIND"
+DATA = PROJECT_ROOT / "data"
 
-PROCESSED=PROJECT_ROOT/"data"/"processed"
+RAW_DATA = DATA / "raw"
 
-GOES_PROCESSED=PROCESSED/"GOES"
-WIND_PROCESSED=PROCESSED/"WIND"
-MASTER_PROCESSED=PROCESSED/"MASTER"
+PROCESSED_DATA = DATA / "processed"
 
-MODELS=PROJECT_ROOT/"models"
+GOES_PROCESSED = PROCESSED_DATA / "GOES"
 
-OUTPUTS=PROJECT_ROOT/"outputs"
+WIND_PROCESSED = PROCESSED_DATA / "WIND"
 
-PLOTS=OUTPUTS/"plots"
-REPORTS=OUTPUTS/"reports"
-PREDICTIONS=OUTPUTS/"predictions"
+TRAIN_DATA = PROCESSED_DATA / "train"
 
-LOGS=PROJECT_ROOT/"logs"
+ARTIFACTS = PROJECT_ROOT / "artifacts"
 
-for folder in [
-GOES_PROCESSED,
-WIND_PROCESSED,
-MASTER_PROCESSED,
-MODELS,
-PLOTS,
-REPORTS,
-PREDICTIONS,
-LOGS]:
-    folder.mkdir(parents=True,exist_ok=True)
+MODELS = ARTIFACTS / "models"
 
-TRAIN_DATA = PROCESSED / "train"
-TRAIN_DATA.mkdir(parents=True, exist_ok=True)
+FIGURES = ARTIFACTS / "figures"
+
+SHAP_DIR = ARTIFACTS / "shap"
+
+LOGS = PROJECT_ROOT / "logs"
+
+RANDOM_STATE = 42
+
+TEST_SIZE = 0.2
+
+SEQUENCE_LENGTH = 72
+
+FORECAST_STEPS = [6,72,144]
+
+TARGETS = [
+    "target_30min",
+    "target_6hr",
+    "target_12hr"
+]

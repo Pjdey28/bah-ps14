@@ -8,6 +8,8 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 
+from src.config import MODELS
+
 
 class StackingEnsemble:
 
@@ -25,6 +27,16 @@ class StackingEnsemble:
 
         ]
 
+        self.save_dir=MODELS/"ensemble"
+
+        self.save_dir.mkdir(
+
+            parents=True,
+
+            exist_ok=True
+
+        )
+
     def _get_prediction(self,predictions,target,index):
 
         if isinstance(predictions,dict):
@@ -35,25 +47,24 @@ class StackingEnsemble:
 
     def train(self,prediction_dict,test_targets):
 
-        Path(
-            "artifacts/models/ensemble"
-        ).mkdir(
-            parents=True,
-            exist_ok=True
-        )
-
         results=[]
+
+        model_names=list(prediction_dict.keys())
 
         for idx,target in enumerate(self.targets):
 
             X=[]
 
-            for model_name in prediction_dict:
+            for model_name in model_names:
 
                 pred=self._get_prediction(
+
                     prediction_dict[model_name],
+
                     target,
+
                     idx
+
                 )
 
                 X.append(pred)
@@ -62,35 +73,53 @@ class StackingEnsemble:
 
             y=test_targets[:,idx]
 
-            meta=Ridge(alpha=1.0)
+            meta=Ridge(
 
-            meta.fit(X,y)
+                alpha=1.0
+
+            )
+
+            meta.fit(
+
+                X,
+
+                y
+
+            )
 
             pred=meta.predict(X)
-
-            rmse=np.sqrt(
-                mean_squared_error(
-                    y,
-                    pred
-                )
-            )
-
-            mae=mean_absolute_error(
-                y,
-                pred
-            )
-
-            r2=r2_score(
-                y,
-                pred
-            )
 
             results.append({
 
                 "Target":target,
-                "RMSE":rmse,
-                "MAE":mae,
-                "R2":r2
+
+                "RMSE":np.sqrt(
+
+                    mean_squared_error(
+
+                        y,
+
+                        pred
+
+                    )
+
+                ),
+
+                "MAE":mean_absolute_error(
+
+                    y,
+
+                    pred
+
+                ),
+
+                "R2":r2_score(
+
+                    y,
+
+                    pred
+
+                )
 
             })
 
@@ -100,13 +129,51 @@ class StackingEnsemble:
 
                 meta,
 
-                f"artifacts/models/ensemble/{target}.pkl"
+                self.save_dir/
+
+                f"{target}.pkl"
 
             )
 
+        metadata={
+
+            "base_models":model_names,
+
+            "meta_model":"Ridge",
+
+            "targets":self.targets
+
+        }
+
+        joblib.dump(
+
+            metadata,
+
+            self.save_dir/
+
+            "metadata.pkl"
+
+        )
+
         return results
 
+    def load(self):
+
+        for target in self.targets:
+
+            self.meta_models[target]=joblib.load(
+
+                self.save_dir/
+
+                f"{target}.pkl"
+
+            )
+
     def predict(self,prediction_dict):
+
+        if len(self.meta_models)==0:
+
+            self.load()
 
         final_predictions={}
 
@@ -117,9 +184,13 @@ class StackingEnsemble:
             for model_name in prediction_dict:
 
                 pred=self._get_prediction(
+
                     prediction_dict[model_name],
+
                     target,
+
                     idx
+
                 )
 
                 X.append(pred)

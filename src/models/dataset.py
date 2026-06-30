@@ -1,13 +1,38 @@
 from pathlib import Path
 import pandas as pd
+import joblib
+
+from sklearn.model_selection import train_test_split
+
 from src.config import TRAIN_DATA
+from src.config import TEST_SIZE
+from src.config import RANDOM_STATE
+from src.config import ARTIFACTS
+
 
 class DatasetLoader:
 
     def __init__(self):
-        pass
 
-    def load_all(self):
+        self.data=None
+
+        self.selected_features=None
+
+    def load_selected_features(self):
+
+        path=ARTIFACTS/"selected_features.pkl"
+
+        if not path.exists():
+
+            raise FileNotFoundError(
+                "Run feature_selector.py first"
+            )
+
+        self.selected_features=joblib.load(path)
+
+        return self.selected_features
+
+    def load(self):
 
         files=sorted(
             Path(TRAIN_DATA).glob("train_*.parquet")
@@ -15,31 +40,46 @@ class DatasetLoader:
 
         dfs=[]
 
-        for file in files:
+        for f in files:
 
-            dfs.append(
-                pd.read_parquet(file)
-            )
+            print(f"Loading {f.name}")
 
-        df=pd.concat(
-            dfs,
-            ignore_index=True
-        )
+            df=pd.read_parquet(f)
 
-        df=df.sort_values("time")
+            dfs.append(df)
 
-        return df
+        self.data=pd.concat(dfs,ignore_index=True)
+
+        return self.data
 
     def train_test_split(self):
 
-        df=self.load_all()
+        if self.data is None:
 
-        train=df[
-            df["time"]<"2024-01-01"
+            self.load()
+
+        if self.selected_features is None:
+
+            self.load_selected_features()
+
+        target_cols=[
+            "target_30min",
+            "target_6hr",
+            "target_12hr"
         ]
 
-        test=df[
-            df["time"]>="2024-01-01"
-        ]
+        cols=self.selected_features+target_cols+["time"]
+
+        df=self.data[cols].copy()
+
+        train,test=train_test_split(
+
+            df,
+
+            test_size=TEST_SIZE,
+
+            shuffle=False
+
+        )
 
         return train,test

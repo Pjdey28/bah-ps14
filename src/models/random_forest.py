@@ -5,7 +5,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-
+from src.config import MODELS
+save_dir=MODELS/"random_forest"
 class RandomForestModel:
 
     def __init__(self):
@@ -29,6 +30,8 @@ class RandomForestModel:
             "time",
 
             "source_file",
+            "source_file_x",
+            "source_file_y",
 
             "target_30min",
 
@@ -53,7 +56,7 @@ class RandomForestModel:
         results=[]
         predictions={}
 
-        Path("artifacts/models/random_forest").mkdir(
+        save_dir.mkdir(
             parents=True,
             exist_ok=True
         )
@@ -143,7 +146,7 @@ class RandomForestModel:
 
                 model,
 
-                f"artifacts/models/random_forest/{target}.pkl"
+                save_dir/f"{target}.pkl"
 
             )
 

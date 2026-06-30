@@ -2,7 +2,7 @@ from src.models.dataset import DatasetLoader
 from src.models.random_forest import RandomForestModel
 from src.models.lightgbm_model import LightGBMModel
 from src.models.xgboost_model import XGBoostModel
-
+from src.config import SEQUENCE_LENGTH
 class TreeModelTrainer:
 
     def __init__(self):
@@ -61,15 +61,19 @@ class TreeModelTrainer:
         prediction_dict["XGBoost"]=xgb_predictions
 
         metrics["XGBoost"]=xgb_metrics
+        for model_name in prediction_dict:
+
+            for target in prediction_dict[model_name]:
+
+                prediction_dict[model_name][target] = prediction_dict[model_name][target][SEQUENCE_LENGTH:]
 
         targets={
 
-            "target_30min":test_df["target_30min"].values,
+            "target_30min":test_df["target_30min"].values[SEQUENCE_LENGTH:],
 
-            "target_6hr":test_df["target_6hr"].values,
+            "target_6hr":test_df["target_6hr"].values[SEQUENCE_LENGTH:],
 
-            "target_12hr":test_df["target_12hr"].values
-
+            "target_12hr":test_df["target_12hr"].values[SEQUENCE_LENGTH:]
         }
 
         return prediction_dict,targets,metrics

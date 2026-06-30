@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from src.models.dataset import DatasetLoader
-
+from src.config import MODELS, SHAP_DIR
 
 class SHAPAnalysis:
 
@@ -13,7 +13,7 @@ class SHAPAnalysis:
 
         os.makedirs(
 
-            "artifacts/shap",
+            SHAP_DIR,
 
             exist_ok=True
 
@@ -57,7 +57,13 @@ class SHAPAnalysis:
 
             model=joblib.load(
 
-                f"artifacts/models/lightgbm/{target}.pkl"
+
+                MODELS/
+
+                "lightgbm"/
+
+                f"{target}.pkl"
+
 
             )
 
@@ -89,7 +95,7 @@ class SHAPAnalysis:
 
             plt.savefig(
 
-                f"artifacts/shap/{target}_summary.png",
+                SHAP_DIR/f"{target}_summary.png",
 
                 dpi=300
 
@@ -115,7 +121,7 @@ class SHAPAnalysis:
 
             plt.savefig(
 
-                f"artifacts/shap/{target}_bar.png",
+                SHAP_DIR/f"{target}_bar.png",
 
                 dpi=300
 

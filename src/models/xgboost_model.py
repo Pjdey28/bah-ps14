@@ -5,7 +5,8 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-
+from src.config import MODELS
+save_dir=MODELS/"xgboost"
 class XGBoostModel:
 
     def __init__(self):
@@ -29,6 +30,8 @@ class XGBoostModel:
             "time",
 
             "source_file",
+            "source_file_x",
+            "source_file_y",
 
             "target_30min",
 
@@ -53,9 +56,12 @@ class XGBoostModel:
         results=[]
         predictions={}
 
-        Path("artifacts/models/xgboost").mkdir(
+        save_dir.mkdir(
+
             parents=True,
+
             exist_ok=True
+
         )
 
         for target in self.targets:
@@ -147,7 +153,7 @@ class XGBoostModel:
 
                 model,
 
-                f"artifacts/models/xgboost/{target}.pkl"
+                save_dir/f"{target}.pkl"
 
             )
 

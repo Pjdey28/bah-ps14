@@ -1,11 +1,16 @@
 import copy
+import joblib
 import numpy as np
 import torch
 import torch.nn as nn
 
+from pathlib import Path
+
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+
+from src.config import MODELS
 
 
 class BaseSequenceTrainer:
@@ -13,9 +18,11 @@ class BaseSequenceTrainer:
     def __init__(
         self,
         model,
+        model_name,
+        feature_names,
         epochs=40,
         learning_rate=1e-3,
-        patience=6
+        patience=8
     ):
 
         self.device=torch.device(
@@ -24,16 +31,37 @@ class BaseSequenceTrainer:
 
         self.model=model.to(self.device)
 
+        self.model_name=model_name
+
+        self.feature_names=feature_names
+
         self.epochs=epochs
 
-        self.optimizer=torch.optim.Adam(
+        self.optimizer=torch.optim.AdamW(
             self.model.parameters(),
-            lr=learning_rate
+            lr=learning_rate,
+            weight_decay=1e-4
+        )
+
+        self.scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode="min",
+            factor=0.5,
+            patience=3
         )
 
         self.criterion=nn.MSELoss()
 
         self.patience=patience
+
+        self.save_dir=MODELS/model_name.lower()
+
+        self.save_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        self.model_path=self.save_dir/"model.pt"
 
     def train(
         self,
@@ -70,15 +98,20 @@ class BaseSequenceTrainer:
 
                 loss.backward()
 
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(),
+                    1.0
+                )
+
                 self.optimizer.step()
 
                 train_loss+=loss.item()
 
             train_loss/=len(train_loader)
 
-            val_loss=0
-
             self.model.eval()
+
+            val_loss=0
 
             with torch.no_grad():
 
@@ -98,6 +131,8 @@ class BaseSequenceTrainer:
                     val_loss+=loss.item()
 
             val_loss/=len(val_loader)
+
+            self.scheduler.step(val_loss)
 
             print(
                 f"Epoch {epoch+1}/{self.epochs} | "
@@ -127,8 +162,30 @@ class BaseSequenceTrainer:
 
         if best_state is not None:
 
-            self.model.load_state_dict(
-                best_state
+            self.model.load_state_dict(best_state)
+
+            torch.save(
+                best_state,
+                self.model_path
+            )
+
+            metadata={
+
+                "features":self.feature_names,
+
+                "n_features":len(self.feature_names),
+
+                "targets":[
+                    "target_30min",
+                    "target_6hr",
+                    "target_12hr"
+                ]
+
+            }
+
+            joblib.dump(
+                metadata,
+                self.save_dir/"metadata.pkl"
             )
 
     def predict(
@@ -181,27 +238,25 @@ class BaseSequenceTrainer:
 
         for i,name in enumerate(horizons):
 
-            rmse=np.sqrt(
-                mean_squared_error(
+            metrics[name]={
+
+                "RMSE":np.sqrt(
+                    mean_squared_error(
+                        true[:,i],
+                        pred[:,i]
+                    )
+                ),
+
+                "MAE":mean_absolute_error(
+                    true[:,i],
+                    pred[:,i]
+                ),
+
+                "R2":r2_score(
                     true[:,i],
                     pred[:,i]
                 )
-            )
 
-            mae=mean_absolute_error(
-                true[:,i],
-                pred[:,i]
-            )
-
-            r2=r2_score(
-                true[:,i],
-                pred[:,i]
-            )
-
-            metrics[name]={
-                "RMSE":rmse,
-                "MAE":mae,
-                "R2":r2
             }
 
         return metrics

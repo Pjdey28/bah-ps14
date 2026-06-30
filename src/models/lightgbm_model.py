@@ -5,7 +5,8 @@ from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-
+from src.config import MODELS
+save_dir=MODELS/"lightgbm"
 class LightGBMModel:
 
     def __init__(self):
@@ -29,6 +30,8 @@ class LightGBMModel:
             "time",
 
             "source_file",
+            "source_file_x",
+            "source_file_y",
 
             "target_30min",
 
@@ -53,11 +56,13 @@ class LightGBMModel:
         results=[]
         predictions={}
 
-        Path("artifacts/models/lightgbm").mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        save_dir.mkdir(
 
+            parents=True,
+
+            exist_ok=True
+
+        )
         for target in self.targets:
 
             print(f"\nTraining LightGBM : {target}")
@@ -139,7 +144,7 @@ class LightGBMModel:
 
                 model,
 
-                f"artifacts/models/lightgbm/{target}.pkl"
+                save_dir/f"{target}.pkl"
 
             )
 
