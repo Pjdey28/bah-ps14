@@ -20,9 +20,9 @@ class BaseSequenceTrainer:
         model,
         model_name,
         feature_names,
-        epochs=40,
+        epochs=15,
         learning_rate=1e-3,
-        patience=8
+        patience=4
     ):
 
         self.device=torch.device(

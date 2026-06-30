@@ -63,11 +63,11 @@ class SequenceTrainer:
 
             feature_names=feature_names,
 
-            epochs=40,
+            epochs=15,
 
             learning_rate=1e-3,
 
-            patience=8
+            patience=4
 
         )
 
