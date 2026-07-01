@@ -1,6 +1,6 @@
 from src.models.dataset import DatasetLoader
 from src.inference.predictor import SolarStormPredictor
-
+from src.config import ARTIFACTS
 
 loader = DatasetLoader()
 
@@ -10,8 +10,4 @@ predictor = SolarStormPredictor()
 
 predictions = predictor.predict(test_df)
 
-print(predictions.head())
-
-print()
-
-print(predictions.shape)
+predictions.to_csv(ARTIFACTS / "predictions.csv", index=False)

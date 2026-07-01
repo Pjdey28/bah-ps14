@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,14 +5,14 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-from src.config import FIGURES, ARTIFACTS
+from src.config import EVALUATION
 
 class ModelComparison:
 
     def __init__(self):
-
-        os.makedirs(
-            FIGURES,
+        self.eval_dir = EVALUATION
+        self.eval_dir.mkdir(
+            parents=True,
             exist_ok=True
         )
 
@@ -80,11 +79,8 @@ class ModelComparison:
         df=pd.DataFrame(results)
 
         df.to_csv(
-
-            ARTIFACTS/f"/model_metrics.csv",
-
+            self.eval_dir / "model_metrics.csv",
             index=False
-
         )
 
         return df
@@ -141,7 +137,7 @@ class ModelComparison:
 
         plt.savefig(
 
-            FIGURES/f"{metric}.png"
+            self.eval_dir / f"{metric}.png"
 
         )
 
@@ -191,7 +187,7 @@ class ModelComparison:
 
             plt.savefig(
 
-                FIGURES/f"{name}_{h}.png"
+                self.eval_dir / f"{name}_{h}.png"
 
             )
 
@@ -233,8 +229,167 @@ class ModelComparison:
 
             plt.savefig(
 
-                FIGURES/f"{name}_Residual_{h}.png"
+                self.eval_dir / f"{name}_Residual_{h}.png"
 
             )
 
             plt.close()
+    def ranking_table(self, df):
+
+        ranking = (
+            df.groupby("Model")
+            .agg({
+                "RMSE":"mean",
+                "MAE":"mean",
+                "R2":"mean"
+            })
+            .sort_values(
+                "RMSE"
+            )
+        )
+
+        ranking.to_csv(
+
+            self.eval_dir /
+            "model_ranking.csv"
+
+        )
+
+        return ranking
+    def best_models(self, df):
+
+        best=[]
+
+        for horizon in df["Horizon"].unique():
+
+            subset=df[
+                df["Horizon"]==horizon
+            ]
+
+            row=subset.loc[
+                subset["RMSE"].idxmin()
+            ]
+
+            best.append(row)
+
+        best=pd.DataFrame(best)
+
+        best.to_csv(
+
+            self.eval_dir/
+            "best_models.csv",
+
+            index=False
+
+        )
+
+        return best
+    def scatter_plot(
+    self,
+    true,
+    pred,
+    name
+):
+
+        horizons=[
+            "30min",
+            "6hr",
+            "12hr"
+        ]
+
+        for i,h in enumerate(horizons):
+
+            plt.figure(figsize=(6,6))
+
+            plt.scatter(
+
+                true[:,i],
+
+                pred[:,i],
+
+                s=5,
+
+                alpha=0.4
+
+            )
+
+            plt.xlabel("Actual")
+
+            plt.ylabel("Prediction")
+
+            plt.title(
+
+                f"{name} {h}"
+
+            )
+
+            plt.tight_layout()
+
+            plt.savefig(
+
+                self.eval_dir/
+
+                f"{name}_Scatter_{h}.png"
+
+            )
+
+            plt.close()
+    def metrics_summary(self):
+
+        df=pd.read_csv(
+
+            self.eval_dir/
+
+            "model_metrics.csv"
+
+        )
+
+        summary=df.groupby(
+
+            "Model"
+
+        ).mean(
+
+            numeric_only=True
+
+        )
+
+        summary.to_csv(
+
+            self.eval_dir/
+
+            "metrics_summary.csv"
+
+        )
+    def save_prediction_sample(
+    self,
+    true,
+    pred,
+    name
+):
+
+        sample=pd.DataFrame({
+
+            "Actual30":true[:1000,0],
+
+            "Pred30":pred[:1000,0],
+
+            "Actual6":true[:1000,1],
+
+            "Pred6":pred[:1000,1],
+
+            "Actual12":true[:1000,2],
+
+            "Pred12":pred[:1000,2]
+
+        })
+
+        sample.to_csv(
+
+            self.eval_dir/
+
+            f"{name}_sample.csv",
+
+            index=False
+
+        )

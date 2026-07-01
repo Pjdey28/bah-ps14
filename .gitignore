@@ -4,7 +4,7 @@ logs/
 outputs/
 .ipynb_checkpoints/
 .env
-artifacts/
+artifacts/models/
 .venv/
 data/
 data/raw/
@@ -12,3 +12,7 @@ data/processed/
 *.nc
 *.parquet
 *.cdf
+*.pkl
+*.pt
+live-monitor/
+live-backend/

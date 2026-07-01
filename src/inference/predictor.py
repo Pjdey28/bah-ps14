@@ -31,8 +31,7 @@ class SolarStormPredictor:
 
             for target in TARGETS:
 
-                tree_predictions[model_name][target] = \
-                    tree_predictions[model_name][target][SEQUENCE_LENGTH:]
+                tree_predictions[model_name][target] = tree_predictions[model_name][target][SEQUENCE_LENGTH:]
 
         sequence_predictions = self.predictor.predict_sequence(df)
 

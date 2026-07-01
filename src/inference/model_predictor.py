@@ -213,3 +213,73 @@ class ModelPredictor:
                 predictions[model_name][target] = outputs[:, idx]
 
         return predictions
+    def predict_model(
+        self,
+        model_name,
+        test_df):
+
+        if not self.tree_models:
+            self.load_tree_models()
+
+        if not self.sequence_models:
+            self.load_sequence_models()
+
+        if model_name in ["RandomForest", "LightGBM", "XGBoost"]:
+
+            predictions = self.predict_tree(test_df)
+
+            return np.column_stack([
+
+                predictions[model_name]["target_30min"],
+
+                predictions[model_name]["target_6hr"],
+
+                predictions[model_name]["target_12hr"]
+
+            ])
+
+        if model_name == "LSTM":
+
+            predictions = self.predict_sequence(test_df)
+
+            return np.column_stack([
+
+                predictions["LSTMForecast"]["target_30min"],
+
+                predictions["LSTMForecast"]["target_6hr"],
+
+                predictions["LSTMForecast"]["target_12hr"]
+
+            ])
+
+        if model_name == "GRU":
+
+            predictions = self.predict_sequence(test_df)
+
+            return np.column_stack([
+
+                predictions["GRUForecast"]["target_30min"],
+
+                predictions["GRUForecast"]["target_6hr"],
+
+                predictions["GRUForecast"]["target_12hr"]
+
+            ])
+
+        if model_name == "Ensemble":
+
+            from src.inference.predictor import SolarStormPredictor
+
+            predictor = SolarStormPredictor()
+
+            result = predictor.predict(test_df)
+
+            return result[
+                [
+                    "predicted_30min",
+                    "predicted_6hr",
+                    "predicted_12hr"
+                ]
+            ].values
+
+        raise ValueError(f"Unknown model {model_name}")

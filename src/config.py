@@ -18,7 +18,7 @@ ARTIFACTS = PROJECT_ROOT / "artifacts"
 
 MODELS = ARTIFACTS / "models"
 
-FIGURES = ARTIFACTS / "figures"
+EVALUATION = ARTIFACTS / "evaluation"
 
 SHAP_DIR = ARTIFACTS / "shap"
 
