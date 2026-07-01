@@ -1,0 +1,9 @@
+Flask
+Flask-Cors
+Flask-SocketIO
+eventlet
+numpy
+pandas
+pyarrow
+joblib
+scikit-learn

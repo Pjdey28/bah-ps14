@@ -14,8 +14,6 @@ data/processed/
 *.cdf
 *.pkl
 *.pt
-live-backend/
-live-monitor/
 live-monitor/node_modules/
 live-monitor/dist/
 live-backend/__pycache__/
