@@ -13,8 +13,8 @@ st.set_page_config(
 )
 
 # Define project structure
-ARTIFACTS = Path(__file__).parent.parent / "artifacts"
-CSS_FILE = Path(__file__).parent / "style.css"
+ARTIFACTS = Path(__file__).resolve().parent.parent / "artifacts"
+CSS_FILE = Path(__file__).resolve().parent / "style.css"
 
 # Inject CSS
 load_css(CSS_FILE)
